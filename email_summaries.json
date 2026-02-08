@@ -1,0 +1,20 @@
+[
+  {
+    "original_email": "\nalt.d3-boa18nhm@yopmail.com\n        ",
+    "summary": "I need to see the actual email content to provide a summary. The text you've shared only shows an email address (alt.d3-boa18nhm@yopmail.com), not the full email with its main topic, decisions, actions, or deadlines. Please share the complete email content for me to create a 2-sentence professional summary.",
+    "timestamp": "2026-02-08T03:57:01.663656",
+    "status": "success"
+  },
+  {
+    "original_email": "\nTeam,\n\nQuick update on the client project. We've hit a blocker with the API integration.\nThe vendor isn't responding to our integration requests. We're escalating to their \nmanagement team. \n\nExpecte...",
+    "summary": "The client project has encountered an API integration blocker due to vendor unresponsiveness, with escalation to vendor management expected to resolve the issue by next Tuesday. The team should proceed with UI design and backend logic work while awaiting resolution.",
+    "timestamp": "2026-02-08T03:57:04.719758",
+    "status": "success"
+  },
+  {
+    "original_email": "\nHi All,\n\nExciting news! We just closed the deal with TechCorp. Contract signed this morning.\nThey're going to be a major client for us. Kick-off meeting is scheduled for \nnext Monday at 10 AM.\n\nPleas...",
+    "summary": "**Summary:**\n\nTechCorp deal has been finalized with contract signing completed, and a kick-off meeting is scheduled for next Monday at 10 AM. All recipients must confirm their availability and prepare introduction slides prior to the meeting.",
+    "timestamp": "2026-02-08T03:57:07.790807",
+    "status": "success"
+  }
+]
