@@ -1,0 +1,336 @@
+{
+  "name": "Google Sheets Lead Enricher",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-sonnet-4-6",
+          "mode": "list",
+          "cachedResultName": "claude-sonnet-4-6"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Name: {{ $json['Name '] }}\nCompany: {{ $json['Company'] }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "=You are a B2B sales research assistant.\nWhen given a person's name and company, respond ONLY with a raw JSON object.\nNo markdown, no backticks, no explanation, no preamble.\nExact format:\n{\n  \"company_summary\": \"2-3 sentence summary of what the company does\",\n  \"suggested_pitch\": \"2-3 sentence personalized sales pitch for this lead\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0192fd5c-9e4a-4f83-a4b9-14e8ec9dca46",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "q1LnQdV0GRHvHq2a",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\n\n// Anthropic Claude response structure\nconst raw = \n  item?.content?.[0]?.text ||\n  item?.completion ||\n  null;\n\nif (!raw) {\n  throw new Error(\"Could not find content in Anthropic response. Check output panel.\");\n}\n\n// Check if already an object or needs parsing\nconst parsed = typeof raw === 'object' ? raw : JSON.parse(raw);\n\nreturn [{\n  json: {\n    company_summary: parsed.company_summary,\n    suggested_pitch: parsed.suggested_pitch\n  }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        0
+      ],
+      "id": "353940e4-6503-4664-937f-895e5a4aa1f4",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Google Sheets Trigger').item.json.Email }}",
+            "Company": "={{ $('Google Sheets Trigger').item.json.Company }}",
+            "Name ": "={{ $('Google Sheets Trigger').item.json['Name '] }}",
+            "Company Summary": "={{ $json.company_summary }}",
+            "Suggested Pitch": "={{ $json.suggested_pitch }}",
+            "Status": "=enriched"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company Summary",
+              "displayName": "Company Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Suggested Pitch",
+              "displayName": "Suggested Pitch",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        0
+      ],
+      "id": "55ca4431-453d-43f7-8744-27f030faa36a",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xzI6iBRO03rcG8Sa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1503fdeb-9e39-4d42-8f76-936b6c29fae7",
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -80,
+        96
+      ],
+      "id": "5822951c-4635-4429-ae84-dc4651db47cd",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        192,
+        224
+      ],
+      "id": "1ed6b893-a521-4381-b459-391b7aeee358",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -128
+      ],
+      "id": "42ddf7b1-6a24-4ae8-a21d-b97232e08060",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "xMcR84WI0TRjGX31",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "1a97b461-77e2-4f7c-a9b3-13953acbdd53",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b5f53f8f81f54c60361d35c33fb697c5a3eb0f8f727d19320ce6b3590588dc63"
+  },
+  "id": "GSBPFWZJ8c6OvRm0",
+  "tags": []
+}
