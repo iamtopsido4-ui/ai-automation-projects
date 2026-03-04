@@ -18,8 +18,6 @@ Flow:
 Google Sheets Trigger → Claude AI → Code (Parse JSON) → Google Sheets Update Row
 Business value: Eliminates manual lead research. Sales teams get instant, personalized pitch suggestions for every new lead.
 
-Tech Stack
-ToolPurposen8nWorkflow automationAnthropic ClaudeAI text generationGmailEmail trigger & draft creationGoogle SheetsData input & output
 
 How to Use
 
@@ -38,11 +36,4 @@ Google account with Gmail and Google Sheets access
 
 
 About
-Built as part of a structured AI automation learning path focused on real-world business workflows. New workflows added weekly.
-Skills demonstrated:
-
-n8n workflow design
-Anthropic Claude API integration
-Google Workspace automation
-JSON parsing and data transformation
-Webhook and trigger-based architecture
+Built as part of a structured AI automation learning path focused on real-world business workflows.
