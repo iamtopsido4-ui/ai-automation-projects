@@ -18,7 +18,7 @@ Flow:
 Google Sheets Trigger → Claude AI → Code (Parse JSON) → Google Sheets Update Row
 Business value: Eliminates manual lead research. Sales teams get instant, personalized pitch suggestions for every new lead.
 
-Workflow 4 — Customer Support Ticket Classifier
+Workflow 3 — Customer Support Ticket Classifier
 File: workflow-4-support-ticket-classifier.json
 Receives customer support submissions via webhook, uses Claude to classify urgency and category, routes each ticket to the correct Google Sheet tab via a Switch node, and sends an automatic reply email to the customer.
 Tools used: Webhook · Anthropic Claude · Switch Node · Google Sheets · Gmail
