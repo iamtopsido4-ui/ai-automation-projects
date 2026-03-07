@@ -2,7 +2,7 @@ AI Automation Portfolio
 A collection of production-ready n8n workflows built for real business use cases. Each workflow is plug-and-play and uses Claude (Anthropic) AI for intelligent automation.
 
 Workflows
-✅ Workflow 1 — AI Email Responder
+Workflow 1 — AI Email Responder
 File: workflow-1-ai-email-responder.json
 Automatically drafts AI-generated replies to incoming emails and saves them as Gmail drafts for review before sending.
 Tools used: Gmail · Anthropic Claude
@@ -10,13 +10,24 @@ Flow:
 Gmail Trigger → Claude AI → Gmail Create Draft
 Business value: Saves hours of email handling time. Ideal for customer support, sales, and operations teams.
 
-✅ Workflow 2 — Google Sheets Lead Enricher
+Workflow 2 — Google Sheets Lead Enricher
 File: workflow-2-lead-enricher.json
 Watches a Google Sheet for new leads. When a new row is added with a name and company, Claude AI automatically generates a company summary and personalized sales pitch, then writes the results back to the sheet.
 Tools used: Google Sheets · Anthropic Claude
 Flow:
 Google Sheets Trigger → Claude AI → Code (Parse JSON) → Google Sheets Update Row
 Business value: Eliminates manual lead research. Sales teams get instant, personalized pitch suggestions for every new lead.
+
+Workflow 4 — Customer Support Ticket Classifier
+File: workflow-4-support-ticket-classifier.json
+Receives customer support submissions via webhook, uses Claude to classify urgency and category, routes each ticket to the correct Google Sheet tab via a Switch node, and sends an automatic reply email to the customer.
+Tools used: Webhook · Anthropic Claude · Switch Node · Google Sheets · Gmail
+Flow:
+Webhook → Claude AI → Code (Parse JSON) → Switch
+                                            ├── Urgent  → Sheets: Urgent tab  ──┐
+                                            ├── Billing → Sheets: Billing tab ──┤→ Gmail
+                                            └── General → Sheets: General tab ──┘
+Business value: Eliminates manual ticket sorting. Support teams instantly see prioritized, categorized tickets with customers getting immediate auto-replies.
 
 
 How to Use
