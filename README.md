@@ -29,7 +29,7 @@ Webhook → Claude AI → Code (Parse JSON) → Switch
                                             └── General → Sheets: General tab ──┘
 Business value: Eliminates manual ticket sorting. Support teams instantly see prioritized, categorized tickets with customers getting immediate auto-replies.
 
-Workflow 4 — AI Daily Standup Reporter
+Workflow 4 — Daily AI Business Briefing
 File: Workflow-5-daily-standup.json`
 
 Every morning at 8am, pulls active tasks from Google Sheets, generates an intelligent daily standup report with priorities, risks, and a motivational message, then sends it via Gmail and logs it to Google Docs.
