@@ -29,6 +29,20 @@ Webhook → Claude AI → Code (Parse JSON) → Switch
                                             └── General → Sheets: General tab ──┘
 Business value: Eliminates manual ticket sorting. Support teams instantly see prioritized, categorized tickets with customers getting immediate auto-replies.
 
+Workflow 4 — AI Daily Standup Reporter
+File: Workflow-5-daily-standup.json`
+
+Every morning at 8am, pulls active tasks from Google Sheets, generates an intelligent daily standup report with priorities, risks, and a motivational message, then sends it via Gmail and logs it to Google Docs.
+
+Tools used:  Schedule Trigger · Google Sheets · Anthropic Claude · Gmail · Google Docs
+
+Flow:
+Schedule Trigger → Google Sheets → Code (Format Tasks) → Claude AI → Code (Parse JSON) → Gmail → Google Docs
+
+Business value: Teams start every day with a smart, auto-generated briefing. No more manual standup prep or missed priorities.
+
+
+
 
 How to Use
 
