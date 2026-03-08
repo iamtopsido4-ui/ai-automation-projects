@@ -1,0 +1,289 @@
+{
+  "name": "Daily AI Business Briefing",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ecd9efa8-febd-4176-8084-b065a93a6dce",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1onop_pgqcvRvoGF9kaq78V2DXrjiujc83k5HA1MJAi0",
+          "mode": "list",
+          "cachedResultName": "urgent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1onop_pgqcvRvoGF9kaq78V2DXrjiujc83k5HA1MJAi0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1onop_pgqcvRvoGF9kaq78V2DXrjiujc83k5HA1MJAi0/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "To-Do"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b4c80098-831b-4312-a450-2731390e5e9b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xzI6iBRO03rcG8Sa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all();\n\nconst tasks = rows.map(row => {\n  const r = row.json;\n  return `- ${r.Task} | Status: ${r.Status} | Priority: ${r.Priority} | Due: ${r['Due Date']}`;\n}).join('\\n');\n\nconst today = new Date().toDateString();\n\nreturn [{ json: { tasks, today } }]\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "4ddb2b65-0b44-4567-a6e6-23446887258f",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-opus-4-20250514",
+          "mode": "list",
+          "cachedResultName": "claude-opus-4-20250514"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Today is: {{ $json.today }}\nTasks: {{ $json.tasks }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "=You are a smart executive assistant. \nGiven a list of tasks, write a concise daily standup report.\nReturn ONLY a raw JSON object, no backticks, no markdown.\nExact format:\n{\n  \"subject\": \"Daily Standup - [today's date]\",\n  \"summary\": \"2 sentence overview of the day\",\n  \"priorities\": \"top 3 things to focus on today as bullet points\",\n  \"risks\": \"any overdue or high priority items to flag\",\n  \"motivation\": \"one short motivational sentence to start the day\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "d0aae547-812a-4827-b767-f8bd4bb84b6c",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "q1LnQdV0GRHvHq2a",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst raw = item?.content?.[0]?.text || null;\n\nif (!raw) throw new Error(\"No content from Claude\");\n\nconst cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();\nconst parsed = typeof cleaned === 'object' ? cleaned : JSON.parse(cleaned);\n\nreturn [{\n  json: {\n    subject: parsed.subject,\n    summary: parsed.summary,\n    priorities: parsed.priorities,\n    risks: parsed.risks,\n    motivation: parsed.motivation\n  }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "3755521b-fec1-406d-bf00-b5cb072615b1",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "iamtopsido4@gmail.com",
+        "subject": "={{ $json.sunject }}",
+        "message": "={{ $json.summary }}  TODAY'S PRIORITIES ================== {{ $json.priorities }}  FLAGS & RISKS ============= {{ $json.risks }}  {{ $json.motivation }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "4dad886f-c611-49c1-9bc4-7bb57b84dbc6",
+      "name": "Send a message",
+      "webhookId": "7ddcabcb-29cb-4ae6-b210-fba74445e9dc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UVCYvb9mmBdHpDGf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "1Us7bYKjTGq0CzLukYnpWU0aEGKs82STI",
+        "title": "=Standup Report - {{ $now.toFormat('yyyy-MM-dd') }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "6ff29d82-e9bb-4163-8b0f-727f452e3398",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3XB868oBC8NLAC5x",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $('Code in JavaScript1').item.json.summary }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "def82a93-6719-4778-95e2-0daab53d86c1",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3XB868oBC8NLAC5x",
+          "name": "Google Docs account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "ff2bc0f4-4823-4bd6-a83e-b287e3bb2600",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b5f53f8f81f54c60361d35c33fb697c5a3eb0f8f727d19320ce6b3590588dc63"
+  },
+  "id": "njYdsjPf4wmQ3Ldl",
+  "tags": []
+}
