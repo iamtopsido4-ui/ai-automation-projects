@@ -1,0 +1,286 @@
+{
+  "name": "AI Meeting Notes",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "13WpyNw9kGmnRznJX5QKJ5aVYwfLFKyab",
+          "mode": "list",
+          "cachedResultName": "Meeting Transcripts",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/13WpyNw9kGmnRznJX5QKJ5aVYwfLFKyab"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bbb92479-7db6-4aee-aabb-036edecbe88c",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xxoKdQxRTuBUcyyu",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-opus-4-20250514",
+          "mode": "list",
+          "cachedResultName": "claude-opus-4-20250514"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.transcript }}"
+            }
+          ]
+        },
+        "options": {
+          "system": "=You are an expert meeting assistant.\nAnalyze the meeting transcript and return ONLY a raw JSON object.\nNo backticks, no markdown, no explanation.\nExact format:\n{\n  \"meeting_summary\": \"2-3 sentence overview of what the meeting was about\",\n  \"action_items\": [\n    { \"task\": \"task description\", \"owner\": \"person name or Unknown\", \"due\": \"due date or ASAP\" }\n  ],\n  \"decisions\": [\"decision 1\", \"decision 2\"],\n  \"follow_up\": \"one sentence on what needs to happen next\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "c0cfcb91-45cd-4ff8-ab05-a0c754cbda55",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "q1LnQdV0GRHvHq2a",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst raw = item?.content?.[0]?.text || null;\n\nif (!raw) throw new Error(\"No content from Claude\");\n\nconst cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();\nconst parsed = typeof cleaned === 'object' ? cleaned : JSON.parse(cleaned);\n\n// Format action items as readable text\nconst actionItems = parsed.action_items.map((a, i) => \n  `${i + 1}. ${a.task}\\n   Owner: ${a.owner} | Due: ${a.due}`\n).join('\\n\\n');\n\n// Format decisions as readable text\nconst decisions = parsed.decisions.map((d, i) => \n  `${i + 1}. ${d}`\n).join('\\n');\n\nreturn [{\n  json: {\n    meeting_summary: parsed.meeting_summary,\n    action_items: actionItems,\n    decisions: decisions,\n    follow_up: parsed.follow_up\n  }\n}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "ec4c1b39-640e-46a0-98d1-cec3535a0787",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "folderId": "11rUXaF2lL77UO-o8OxSnxZT0bgpq7-gF",
+        "title": "=Meeting Notes - {{ $now.toFormat('yyyy-MM-dd') }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "ce1d6bd9-4bde-4331-8cce-ee20b4054102",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3XB868oBC8NLAC5x",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=MEETING SUMMARY\n===============\n{{ $('Code in JavaScript1').item.json.meeting_summary }}\n\nACTION ITEMS\n============\n{{ $('Code in JavaScript1').item.json.action_items }}\n\n\nDECISIONS MADE\n==============\n{{ $('Code in JavaScript1').item.json.decisions }}\n\nFOLLOW UP\n=========\n\n{{ $('Code in JavaScript1').item.json.follow_up }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "24d81076-8ec1-420f-a919-2e32108db2c5",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "3XB868oBC8NLAC5x",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "iamtopsido4@gmail.com",
+        "subject": "=Meeting Notes - {{ $now.toFormat('yyyy-MM-dd') }}",
+        "message": "=<p>Hi team,</p>\n<p>Here's a summary of today's meeting.</p>\n\n<h3>📋 Summary</h3>\n<p>{{ $('Code in JavaScript1').item.json.meeting_summary }}</p>\n\n<h3>✅ Action Items</h3>\n<p>{{ $('Code in JavaScript1').item.json.action_items }}</p>\n\n<h3>🏛️ Decisions Made</h3>\n<p>{{ $('Code in JavaScript1').item.json.decisions }}</p>\n\n<h3>🔜 Follow Up</h3>\n<p>{{ $('Code in JavaScript1').item.json.follow_up }}</p>\n\n<br>\n<p><i>This was auto-generated by our AI meeting assistant.</i></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        0
+      ],
+      "id": "a1857315-9a43-4690-a679-7ffd5410c0f6",
+      "name": "Send a message",
+      "webhookId": "bafc650b-f872-4d28-8dd6-dc9faaa7412b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UVCYvb9mmBdHpDGf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const text = $input.first().json.data ||\n             $input.first().json.body ||\n             $input.first().json;\n\nconst content = typeof text === 'string' ? text : JSON.stringify(text);\n\nreturn [{ json: { transcript: content.slice(0, 4000) } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        160
+      ],
+      "id": "cd42d096-8261-4b64-805a-fbfb402ac663",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "=https://docs.google.com/document/d/{{ $('Google Drive Trigger').item.json.id }}/export?format=txt",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "6436435b-c10f-49c4-a9be-1c34d29b0cc4",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "xxoKdQxRTuBUcyyu",
+          "name": "Google Drive account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fd59794d-2797-48de-9d13-bfa08285682e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b5f53f8f81f54c60361d35c33fb697c5a3eb0f8f727d19320ce6b3590588dc63"
+  },
+  "id": "4sjyW8AL9G7FFTMA",
+  "tags": []
+}
