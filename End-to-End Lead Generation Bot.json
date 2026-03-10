@@ -1,0 +1,353 @@
+{
+  "name": "End-to-End Lead Generation Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-generation",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        -96
+      ],
+      "id": "cc348b4e-f240-460f-9a09-6deef02cd953",
+      "name": "Webhook",
+      "webhookId": "9bc7821c-7fcf-41c3-8bde-c7b4b2471743"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "claude-opus-4-20250514",
+          "mode": "list",
+          "cachedResultName": "claude-opus-4-20250514"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Name: {{ $json.name }}\nTitle: {{ $json.title }}\nCompany: {{ $json.company }}\n\nCRITICAL: Do not use line breaks, tabs, or special characters inside JSON string values. Use spaces only."
+            }
+          ]
+        },
+        "options": {
+          "system": "=You are an expert B2B sales copywriter.\nWrite a short, personalized cold outreach email for the lead below.\nReturn ONLY a raw JSON object, no backticks, no markdown.\nExact format:\n{\n  \"subject\": \"compelling email subject line\",\n  \"email_body\": \"personalized 3 paragraph email. Para 1: personalized opener mentioning their role and company. Para 2: value proposition. Para 3: clear CTA asking for a 15 min call\"}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.anthropic",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -96
+      ],
+      "id": "e30ef5ac-c812-4f2c-8ce7-42e4c516bd1d",
+      "name": "Message a model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "q1LnQdV0GRHvHq2a",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst raw = item?.content?.[0]?.text || null;\n\nif (!raw) throw new Error(\"No content from Claude\");\n\n// Remove backticks and markdown\nlet cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();\n\n// Remove bad control characters that break JSON parsing\ncleaned = cleaned.replace(/[\\x00-\\x1F\\x7F]/g, ' ');\n\n// Fix common issues\ncleaned = cleaned.replace(/\\n/g, ' ').replace(/\\r/g, ' ').replace(/\\t/g, ' ');\n\nconst parsed = typeof cleaned === 'object' ? cleaned : JSON.parse(cleaned);\n\nreturn [{\n  json: {\n    subject: parsed.subject,\n    email_body: parsed.email_body\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "079ed489-74bb-4ef8-ac05-e0d17360c755",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w",
+          "mode": "list",
+          "cachedResultName": "Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1hklpzNK98VYBtP0fhv3mpkp7mRlvk2NzwvXOvoyHc-w/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Code in JavaScript2').item.json.name }}",
+            "Subject": "={{ $json.subject }}",
+            "Email Body": "={{ $json.email_body }}",
+            "Title": "={{ $('Code in JavaScript2').item.json.title }}",
+            "Company": "={{ $('Code in JavaScript2').item.json.company }}",
+            "Email": "={{ $('Code in JavaScript2').item.json.email }}",
+            "Status": "Pending",
+            "Date": "={{ $now.toFormat('yyyy-MM-dd') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subject",
+              "displayName": "Subject",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email Body",
+              "displayName": "Email Body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1024,
+        -96
+      ],
+      "id": "d42af846-76ba-465f-b994-e501d4d5ee2d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xzI6iBRO03rcG8Sa",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e3a534a2-e3f7-4caf-a085-0c7fd79c2e80",
+              "leftValue": "={{ $json.Email }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "={{ false }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1248,
+        -96
+      ],
+      "id": "8941a788-9ed1-4626-b6ee-f65c1493fec8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "={{ $json.Subject }}",
+        "message": "={{ $json['Email Body'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1472,
+        -96
+      ],
+      "id": "d16a60b3-5a46-4671-bea1-37bbe037ea09",
+      "name": "Send a message",
+      "webhookId": "d78e9dfe-ae0d-4cc8-a80f-429cbc737de1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UVCYvb9mmBdHpDGf",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Simulate leads coming from an external API\nconst industry = $input.first().json.body.industry || 'SaaS';\nconst title = $input.first().json.body.title || 'CEO';\n\nconst mockLeads = [\n  {\n    name: \"Sarah Johnson\",\n    title: title,\n    company: `${industry} Corp`,\n    email: \"sarah.johnson@saascorp.com\",\n    linkedin: \"linkedin.com/in/sarahjohnson\"\n  },\n  {\n    name: \"Michael Chen\",\n    title: title,\n    company: `${industry} Solutions`,\n    email: \"m.chen@saacsolutions.com\",\n    linkedin: \"linkedin.com/in/michaelchen\"\n  },\n  {\n    name: \"Emily Roberts\",\n    title: title,\n    company: `${industry} Labs`,\n    email: \"emily@saaslabs.io\",\n    linkedin: \"linkedin.com/in/emilyroberts\"\n  }\n];\n\nreturn mockLeads.map(lead => ({ json: lead }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -96
+      ],
+      "id": "b23ec7f1-a731-4b4d-ba30-25ad8aa95e6d",
+      "name": "Code in JavaScript2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "df007b0f-0ad2-425d-b3bb-0f09e6cd0e64",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b5f53f8f81f54c60361d35c33fb697c5a3eb0f8f727d19320ce6b3590588dc63"
+  },
+  "id": "Blnpc827S88fo4S0",
+  "tags": []
+}
