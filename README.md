@@ -41,6 +41,16 @@ Schedule Trigger → Google Sheets → Code (Format Tasks) → Claude AI → Cod
 
 Business value: Teams start every day with a smart, auto-generated briefing. No more manual standup prep or missed priorities.
 
+Workflow 5 — AI Meeting Notes 
+File: workflow-6-meeting-notes.json
+Detects new meeting transcripts uploaded to a Google Drive folder, extracts the content, and uses Claude AI to generate a structured summary with action items, decisions, and follow-ups. Sends a formatted HTML email to attendees and logs everything to a Google Doc.
+Tools used: Google Drive Trigger · HTTP Request · Anthropic Claude · Google Docs · Gmail
+Flow:
+Google Drive Trigger → HTTP Request (Export Doc) → Code (Extract Text) → Claude AI → Code (Parse JSON) → Google Docs Create → Google Docs Update → Gmail
+Business value: Eliminates manual meeting notes. Every meeting automatically produces a structured, actionable summary delivered straight to the team's inbox.
+
+Note: For reading Google Docs content in n8n, use an HTTP Request node with Google Drive OAuth2 API credentials instead of the built-in Google Drive Download node — significantly more reliable on n8n Cloud.
+
 
 
 
